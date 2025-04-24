@@ -6,6 +6,7 @@ import com.example.final_assignment.dto.UserDto;
 import com.example.final_assignment.entities.User;
 import com.example.final_assignment.entities.enums.Role;
 import com.example.final_assignment.repositories.UserRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.engine.spi.Resolution;
 import org.modelmapper.ModelMapper;
@@ -36,6 +37,19 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(()->new BadCredentialsException("User Not found with the given email"));
     }
 
+    public UserDto toDto(User user){
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .visibility(user.getVisibility())
+                .role(user.getRole())
+                .followers(user.getFollowers().stream().map(User::getName).collect(Collectors.toList()))
+                .following(user.getFollowing().stream().map(User::getName).collect(Collectors.toList()))
+                .build();
+
+    }
+
     public List<UserDto> getAllUsers(String search){
         List<User> users;
         if(search!=null && !search.isEmpty()){
@@ -46,7 +60,7 @@ public class UserService implements UserDetailsService {
         }
         return users
                 .stream()
-                .map(user -> modelMapper.map(user,UserDto.class))
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -88,6 +102,37 @@ public class UserService implements UserDetailsService {
     }
 
     public User save(User user){return userRepo.save(user);}
+
+    @Transactional
+    public void followUser(Long userId,User user){
+        User targetUser= getUserById(userId);
+        User currentUser=userRepo.findById(user.getId())
+                .orElseThrow(()->new RuntimeException("Current user not found"));
+        if(targetUser.equals(currentUser)) throw new RuntimeException("You can't follow yourself");
+        if(targetUser.getFollowers().contains(currentUser)) throw new RuntimeException("You already follows this user");
+
+
+        targetUser.getFollowers().add(currentUser);
+        currentUser.getFollowing().add(targetUser);
+
+        userRepo.save(targetUser);
+        userRepo.save(currentUser);
+    }
+
+    @Transactional
+    public void unfollowUser(Long userId,User user){
+        User targetUser= getUserById(userId);
+        User currentUser=userRepo.findById(user.getId())
+                .orElseThrow(()->new RuntimeException("Current user not found"));
+
+        if(targetUser.equals(currentUser)) throw new RuntimeException("You can't unfollow yourself");
+
+        targetUser.getFollowers().remove(currentUser);
+        currentUser.getFollowing().remove(targetUser);
+
+        userRepo.save(targetUser);
+        userRepo.save(currentUser);
+    }
 
 
 //    public void importUsersFromFile(MultipartFile file){

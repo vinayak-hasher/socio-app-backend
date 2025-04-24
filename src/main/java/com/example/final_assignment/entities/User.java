@@ -49,6 +49,19 @@ public class User implements UserDetails {
         }
     }
 
+    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @JoinTable(
+            name="user_followers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "follower_id")
+    )
+    private Set<User> followers= new HashSet<>();
+
+
+    @ManyToMany(mappedBy = "followers",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    private Set<User> following= new HashSet<>();
+
+
 
     public User(Long id, String email, String password){
         this.id=id;

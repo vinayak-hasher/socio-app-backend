@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,8 +35,8 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable Long userId){
-        User user=userService.getUserById(userId);
-        return modelMapper.map(user,UserDto.class);
+            User user= userService.getUserById(userId);
+            return userService.toDto(user);
     }
 
     @DeleteMapping("/{userId}")
@@ -50,5 +51,19 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @RequestBody UpdateUserDto userDto){
         UserDto userDto1= userService.updateUser(userId,userDto);
         return ResponseEntity.ok(userDto1);
+    }
+
+    @PostMapping("/{userId}/follow")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> followUser(@PathVariable Long userId, @AuthenticationPrincipal User user){
+        userService.followUser(userId,user);
+        return ResponseEntity.ok("Followed user sucessfully");
+    }
+
+    @PostMapping("/{userId}/unfollow")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> unfollowUser(@PathVariable Long userId, @AuthenticationPrincipal User user){
+        userService.unfollowUser(userId,user);
+        return ResponseEntity.ok("Unfollowed user sucessfully");
     }
 }
