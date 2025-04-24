@@ -7,6 +7,7 @@ import com.example.final_assignment.entities.enums.Role;
 import com.example.final_assignment.repositories.GroupRepository;
 import com.example.final_assignment.repositories.PostRepository;
 import com.example.final_assignment.repositories.UserRepo;
+import com.example.final_assignment.utils.ExcelUserParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -102,20 +103,20 @@ public class AdminService {
         }
     }
 
-//    public void bulkUploadUsers(MultipartFile file) {
-//        try (InputStream input = file.getInputStream()) {
-//            List<User> users = ExcelUserParser.parse(input);
-//            users.forEach(user -> {
-//                if (user.getRoles().contains(Role.ADMIN) && !user.getEmail().endsWith("@socio.com")) {
-//                    throw new IllegalArgumentException("Admin email must end with @socio.com");
-//                }
-//                user.setPassword(encoder.encode(user.getPassword()));
-//                userRepo.save(user);
-//            });
-//            log.info("Bulk upload completed: {} users", users.size());
-//        } catch (IOException e) {
-//            log.error("Failed to process bulk upload: {}", e.getMessage(), e);
-//            throw new RuntimeException("Failed to process file");
-//        }
-//    }
+    public void bulkUploadUsers(MultipartFile file) {
+        try (InputStream input = file.getInputStream()) {
+            List<User> users = ExcelUserParser.parse(input);
+            users.forEach(user -> {
+                if (user.getRole().equals(Role.ADMIN) && !user.getEmail().endsWith("@socio.com")) {
+                    throw new IllegalArgumentException("Admin email must end with @socio.com");
+                }
+                user.setPassword(encoder.encode(user.getPassword()));
+                userRepo.save(user);
+            });
+            log.info("Bulk upload completed: {} users", users.size());
+        } catch (IOException e) {
+            log.error("Failed to process bulk upload: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process file");
+        }
+    }
 }

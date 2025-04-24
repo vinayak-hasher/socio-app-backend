@@ -5,6 +5,7 @@ import com.example.final_assignment.entities.enums.Visibility;
 import com.example.final_assignment.utils.PermissionMapping;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Slf4j
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +47,7 @@ public class User implements UserDetails {
     @PreUpdate
     private void validateRoleAndEmail(){
         if(role==Role.ADMIN && !email.endsWith("@socio.com")){
+            log.error("Email of Admin must end with domain @socio.com");
             throw new IllegalArgumentException("Email is not Valid for admin role");
         }
     }

@@ -2,8 +2,11 @@ package com.example.final_assignment.controllers;
 
 import com.example.final_assignment.dto.*;
 import com.example.final_assignment.services.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,11 +64,13 @@ public class AdminController {
         return ResponseEntity.ok("Action performed: " + action);
     }
 
-//    @PostMapping("/users/bulk-upload")
-//    public ResponseEntity<String> uploadUsers(@RequestParam("file") MultipartFile file) {
-//        log.info("Starting bulk upload of users from file: {}", file.getOriginalFilename());
-//        adminService.bulkUploadUsers(file);
-//        return ResponseEntity.ok("Bulk user upload started");
-//    }
+    @PostMapping(value = "/users/bulk-upload",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload users from Excel file")
+    @ApiResponse(responseCode = "200", description = "Upload done")
+    public ResponseEntity<String> uploadUsers(@RequestParam("file") MultipartFile file) {
+        log.info("Starting bulk upload of users from file: {}", file.getOriginalFilename());
+        adminService.bulkUploadUsers(file);
+        return ResponseEntity.ok("Bulk user upload started");
+    }
 }
 
