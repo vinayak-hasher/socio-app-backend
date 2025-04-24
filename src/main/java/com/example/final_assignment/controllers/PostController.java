@@ -71,4 +71,11 @@ public class PostController {
         postService.reportPost(postId,reason,user);
         return ResponseEntity.ok("Post Reported");
     }
+
+    @PostMapping("/{postId}/share")
+    public ResponseEntity<String> sharePost(@PathVariable Long postId, @AuthenticationPrincipal User user){
+        postService.sharePost(postId,user);
+        return ResponseEntity.ok("Post Shared sucessfully");
+    }
+
 }

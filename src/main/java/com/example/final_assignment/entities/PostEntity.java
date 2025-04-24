@@ -1,11 +1,7 @@
 package com.example.final_assignment.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.w3c.dom.ls.LSInput;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +36,14 @@ public class PostEntity {
 
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Report> reports=new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PostEntity originalPost;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User originalUser;
+
+    @ManyToOne (fetch = FetchType.LAZY)
+    private UserGroup group;
 
 }

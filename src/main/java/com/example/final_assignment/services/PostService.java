@@ -3,6 +3,7 @@ package com.example.final_assignment.services;
 import com.example.final_assignment.dto.*;
 import com.example.final_assignment.entities.*;
 import com.example.final_assignment.repositories.PostRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,8 @@ public class PostService {
                 .comments(savedPost.getComments().stream()
                         .map(Comment::getContent)
                         .collect(Collectors.toList()))
+                .sharedFromUser(savedPost.getOriginalUser()!=null ? savedPost.getOriginalUser().getName():null)
+                .sharedFromPostId(savedPost.getOriginalPost()!=null ?savedPost.getOriginalPost().getId():null)
                 .build();
     }
 
@@ -53,6 +56,8 @@ public class PostService {
                         .comments(post.getComments().stream()
                                 .map(Comment::getContent)
                                 .collect(Collectors.toList()))
+                        .sharedFromUser(post.getOriginalUser()!=null ? post.getOriginalUser().getName():null)
+                        .sharedFromPostId(post.getOriginalPost()!=null ?post.getOriginalPost().getId():null)
                         .build())
                 .collect(Collectors.toList());
     }
@@ -113,4 +118,21 @@ public class PostService {
             postRepository.save(post);
         }
     }
+
+    @Transactional
+    public void sharePost(Long postId, User user){
+        PostEntity original =postRepository.findById(postId)
+                .orElseThrow(()->new RuntimeException("Post Not Found"));
+
+        PostEntity shared= PostEntity.builder()
+                .title("[Shared]"+original.getTitle())
+                .description(original.getDescription())
+                .createdBy(user)
+                .originalPost(original)
+                .originalUser(original.getCreatedBy())
+                .build();
+
+        postRepository.save(shared);
+    }
 }
+
