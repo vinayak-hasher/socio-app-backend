@@ -6,12 +6,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+//import org.hibernate.query.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
 
+//import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -33,27 +38,27 @@ public class AdminController {
     }
 
     @GetMapping("/users/by-followers")
-    public ResponseEntity<List<UserFollowerDto>> getUsersByFollowers() {
+    public ResponseEntity<Page<UserFollowerDto>> getUsersByFollowers(Pageable pageable) {
         log.info("Fetching users grouped by join date and sorted by follower count");
-        return ResponseEntity.ok(adminService.getUsersByFollowersCount());
+        return ResponseEntity.ok(adminService.getUsersByFollowersCount(pageable));
     }
 
     @GetMapping("/posts/analytics")
-    public ResponseEntity<List<PostAnalyticsDto>> getPostAnalytics() {
+    public ResponseEntity<Page<PostAnalyticsDto>> getPostAnalytics(Pageable pageable) {
         log.info("Fetching post analytics");
-        return ResponseEntity.ok(adminService.getPostAnalytics());
+        return ResponseEntity.ok(adminService.getPostAnalytics(pageable));
     }
 
     @GetMapping("/posts/reported")
-    public ResponseEntity<List<ReportedPostDto>> getReportedPosts() {
+    public ResponseEntity<Page<ReportedPostDto>> getReportedPosts(Pageable pageable) {
         log.info("Fetching all reported posts grouped by metadata");
-        return ResponseEntity.ok(adminService.getReportedPostStats());
+        return ResponseEntity.ok(adminService.getReportedPostStats(pageable));
     }
 
     @GetMapping("/groups/ranking")
-    public ResponseEntity<List<GroupStatsDto>> getGroupStats() {
+    public ResponseEntity<Page<GroupStatsDto>> getGroupStats(Pageable pageable) {
         log.info("Fetching group rankings by members and posts");
-        return ResponseEntity.ok(adminService.getGroupRankings());
+        return ResponseEntity.ok(adminService.getGroupRankings(pageable));
     }
 
     @PutMapping("/posts/{postId}/action")

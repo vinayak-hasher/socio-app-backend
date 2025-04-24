@@ -10,19 +10,22 @@ import com.example.final_assignment.repositories.UserRepo;
 import com.example.final_assignment.utils.ExcelUserParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+//import org.hibernate.query.Page;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+//import java.awt.print.Pageable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
+
 
 @Slf4j
 @Service
@@ -45,8 +48,8 @@ public class AdminService {
         log.info("Admin user saved/updated: {}", user.getEmail());
     }
 
-    public List<UserFollowerDto>getUsersByFollowersCount() {
-        return userRepo.findAll().stream()
+    public Page<UserFollowerDto> getUsersByFollowersCount(Pageable pageable) {
+        List<UserFollowerDto> list= userRepo.findAll().stream()
                 .map(user -> UserFollowerDto.builder()
                         .userId(user.getId())
                         .email(user.getEmail())
@@ -55,10 +58,12 @@ public class AdminService {
                         .build())
                 .sorted(Comparator.comparingInt(UserFollowerDto::getFollowerCount).reversed())
                 .collect(Collectors.toList());
+
+        return paginate(list,pageable);
     }
 
-    public List<PostAnalyticsDto> getPostAnalytics() {
-        return postRepo.findAll().stream()
+    public Page<PostAnalyticsDto> getPostAnalytics(Pageable pageable) {
+        List<PostAnalyticsDto> list= postRepo.findAll().stream()
                 .map(post -> PostAnalyticsDto.builder()
                         .id(post.getId())
                         .title(post.getTitle())
@@ -69,10 +74,12 @@ public class AdminService {
                         .build())
                 .sorted(Comparator.comparingInt((PostAnalyticsDto p) -> p.getLikeCount() + p.getCommentCount()).reversed())
                 .collect(Collectors.toList());
+
+        return paginate(list,pageable);
     }
 
-    public List<ReportedPostDto> getReportedPostStats() {
-        return postRepo.findAll().stream()
+    public Page<ReportedPostDto> getReportedPostStats(Pageable pageable) {
+        List<ReportedPostDto> list= postRepo.findAll().stream()
                 .filter(post -> !post.getReports().isEmpty())
                 .map(post -> ReportedPostDto.builder()
                         .postId(post.getId())
@@ -80,10 +87,12 @@ public class AdminService {
                         .reportedBy(post.getReports().stream().map(r -> r.getUser().getEmail()).collect(Collectors.toSet()))
                         .build())
                 .collect(Collectors.toList());
+
+        return paginate(list,pageable);
     }
 
-    public List<GroupStatsDto> getGroupRankings() {
-        return groupRepo.findAll().stream()
+    public Page<GroupStatsDto> getGroupRankings(Pageable pageable) {
+        List<GroupStatsDto> list= groupRepo.findAll().stream()
                 .map(group -> GroupStatsDto.builder()
                         .groupId(group.getId())
                         .name(group.getName())
@@ -91,6 +100,8 @@ public class AdminService {
                         .build())
                 .sorted(Comparator.comparingInt(GroupStatsDto::getMemberCount).reversed())
                 .collect(Collectors.toList());
+
+        return paginate(list,pageable);
     }
 
     public void actOnReportedPost(Long postId, String action) {
@@ -118,5 +129,12 @@ public class AdminService {
             log.error("Failed to process bulk upload: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to process file");
         }
+    }
+
+    private <T> Page<T> paginate(List<T> list, Pageable pageable){
+        int start=(int) pageable.getOffset();
+        int end=Math.min((start+pageable.getPageSize()),list.size());
+        List<T> pageList= (start>=list.size())? new ArrayList<>():list.subList(start,end);
+        return new PageImpl<>(pageList,pageable,list.size());
     }
 }
