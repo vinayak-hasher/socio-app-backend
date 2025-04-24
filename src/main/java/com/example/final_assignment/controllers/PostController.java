@@ -49,4 +49,26 @@ public class PostController {
         PostDto postDto= postService.updatePost(postId,updatePostDto);
         return ResponseEntity.ok(postDto);
     }
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<String> likePost(@PathVariable Long postId, @AuthenticationPrincipal User user){
+        postService.likePost(postId,user);
+        return ResponseEntity.ok("Post Liked");
+    }
+
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<String> commentPost(@PathVariable Long postId,
+                                           @RequestBody String content,
+                                           @AuthenticationPrincipal User user){
+        postService.commentPost(postId, content,user);
+        return ResponseEntity.ok("Comment Posted");
+    }
+
+    @PostMapping("/{postId}/report")
+    public ResponseEntity<String> reportPost(@PathVariable Long postId,
+                                           @RequestBody String reason,
+                                           @AuthenticationPrincipal User user){
+        postService.reportPost(postId,reason,user);
+        return ResponseEntity.ok("Post Reported");
+    }
 }

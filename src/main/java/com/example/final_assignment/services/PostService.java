@@ -1,8 +1,7 @@
 package com.example.final_assignment.services;
 
 import com.example.final_assignment.dto.*;
-import com.example.final_assignment.entities.PostEntity;
-import com.example.final_assignment.entities.User;
+import com.example.final_assignment.entities.*;
 import com.example.final_assignment.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -28,8 +27,10 @@ public class PostService {
                 .title(savedPost.getTitle())
                 .description(savedPost.getDescription())
                 .createdBy(savedPost.getCreatedBy().getName())
-                .likes(savedPost.getLikes())
-                .comments(savedPost.getComments())
+                .likes(savedPost.getLikes().size())
+                .comments(savedPost.getComments().stream()
+                        .map(Comment::getContent)
+                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -48,8 +49,10 @@ public class PostService {
                         .title(post.getTitle())
                         .description(post.getDescription())
                         .createdBy(post.getCreatedBy().getName())
-                        .likes(post.getLikes())
-                        .comments(post.getComments())
+                        .likes(post.getLikes().size())
+                        .comments(post.getComments().stream()
+                                .map(Comment::getContent)
+                                .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -74,5 +77,40 @@ public class PostService {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    public void likePost(Long postId, User user){
+        PostEntity post=postRepository.findById(postId)
+                .orElseThrow(()->new RuntimeException("Post Not Found"));
+
+        boolean alreadyLiked= post.getLikes().stream()
+                .anyMatch(like->like.getUser().equals(user));
+
+        if(!alreadyLiked){
+            post.getLikes().add(PostLikeEntity.builder().post(post).user(user).build());
+            postRepository.save(post);
+        }
+    }
+
+    public void commentPost(Long postId, String content, User user){
+        PostEntity post=postRepository.findById(postId)
+                .orElseThrow(()->new RuntimeException("Post Not Found"));
+
+        post.getComments().add(Comment.builder().post(post).user(user).content(content).build());
+        postRepository.save(post);
+
+    }
+
+    public void reportPost(Long postId, String reason, User user){
+        PostEntity post=postRepository.findById(postId)
+                .orElseThrow(()->new RuntimeException("Post Not Found"));
+
+        boolean alreadyReported= post.getReports().stream()
+                .anyMatch(report->report.getUser().equals(user));
+
+        if(!alreadyReported) {
+            post.getReports().add(Report.builder().post(post).user(user).reason(reason).build());
+            postRepository.save(post);
+        }
     }
 }

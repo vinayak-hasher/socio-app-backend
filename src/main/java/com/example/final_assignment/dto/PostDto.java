@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +16,8 @@ public class PostDto {
     private Long id;
     private String title;
     private String description;
-    private Long likes;
-    private Long comments;
     private String createdBy;
+    private int likes;
+    private List<String> comments;
+
 }
