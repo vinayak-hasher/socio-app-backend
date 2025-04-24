@@ -6,6 +6,7 @@ import com.example.final_assignment.entities.User;
 import com.example.final_assignment.repositories.GroupRepository;
 import com.example.final_assignment.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupService {
 
     private final GroupRepository groupRepository;
@@ -36,6 +38,7 @@ public class GroupService {
                 .orElseThrow(()->new RuntimeException("User not found"));
 
         group.getMembers().add(user);
+        log.info("Member added");
         return toDto(groupRepository.save(group));
     }
 
@@ -47,6 +50,7 @@ public class GroupService {
                 .orElseThrow(()->new RuntimeException("User not found"));
 
         if(!user.equals(group.getCreatedBy()))  group.getMembers().remove(user);
+        log.info("User Removed");
         return toDto(groupRepository.save(group));
     }
 

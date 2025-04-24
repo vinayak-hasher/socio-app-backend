@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     private final UserService userService;
     private final AuthService authService;
@@ -32,13 +34,12 @@ public class AuthController {
     @PostMapping("/signUp")
     public ResponseEntity<UserDto> signUp(@RequestBody SignUpDto signUpDto){
         UserDto userDto=userService.signUp(signUpDto);
+        log.info("User Signup sucess");
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login (@RequestBody LoginDto loginDto, HttpServletResponse response){
-        System.out.println("login hit");
-        System.out.println("Login hit with"+loginDto.getEmail());
         LoginResponseDto loginResponseDto= authService.login(loginDto);
 
         Cookie cookie= new Cookie("jwtToken",loginResponseDto.getJwtToken());
@@ -46,7 +47,7 @@ public class AuthController {
         cookie.setPath("/");
         response.addCookie(cookie);
 
-//        System.out.println(loginResponseDto.getAccessToken());
+        log.info("User Log in success");
         return ResponseEntity.ok(loginResponseDto);
     }
 
@@ -60,6 +61,7 @@ public class AuthController {
         user.setPasswordChangedAt(LocalDateTime.now());
         userRepo.save(user);
 
-        return ResponseEntity.ok("Password changed sucessfully");
+        log.info("Password Changed successfully");
+        return ResponseEntity.ok("Password changed successfully");
     }
 }

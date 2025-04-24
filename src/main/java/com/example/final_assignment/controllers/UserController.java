@@ -7,6 +7,7 @@ import com.example.final_assignment.entities.User;
 import com.example.final_assignment.repositories.UserRepo;
 import com.example.final_assignment.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
     private final UserService userService;
     private final ModelMapper modelMapper;
@@ -40,7 +42,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){ return userService.deleteById(userId);}
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
+        log.info("Deleting user with Id :"+ userId);
+        return userService.deleteById(userId);}
 
     @GetMapping
     public List<UserDto> getAllUsers(@RequestParam(required = false) String search){
@@ -50,6 +54,7 @@ public class UserController {
     @PutMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @RequestBody UpdateUserDto userDto){
         UserDto userDto1= userService.updateUser(userId,userDto);
+        log.info("Updating user with id : "+ userId);
         return ResponseEntity.ok(userDto1);
     }
 

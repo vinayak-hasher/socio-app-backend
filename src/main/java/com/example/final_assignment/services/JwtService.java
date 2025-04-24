@@ -4,6 +4,7 @@ import com.example.final_assignment.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
+@Slf4j
 public class JwtService {
 
     @Value("${jwt.secretKey}")
@@ -23,6 +25,8 @@ public class JwtService {
 
     @SuppressWarnings("deprecation")
     public String generateToken(User user){
+        log.info("Jwt Token Generation....");
+
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("email",user.getEmail())

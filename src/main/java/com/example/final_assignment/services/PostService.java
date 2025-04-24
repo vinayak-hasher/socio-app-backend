@@ -5,6 +5,7 @@ import com.example.final_assignment.entities.*;
 import com.example.final_assignment.repositories.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostService {
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
 
     public PostDto createPost(CreatePostDto postDto, User user){
-        System.out.println("Create Post");
         PostEntity PostToBeCreated=modelMapper.map(postDto,PostEntity.class);
         PostToBeCreated.setCreatedBy(user);
         PostEntity savedPost= postRepository.save(PostToBeCreated);
+        log.info("Post created and saved to DB");
         return PostDto.builder()
                 .id(savedPost.getId())
                 .title(savedPost.getTitle())
@@ -72,6 +74,7 @@ public class PostService {
         existingPost.setTitle(postDto.getTitle());
         existingPost.setDescription(postDto.getDescription());
         PostEntity updatedPost=postRepository.save(existingPost);
+        log.info("Post updated and saved to DB");
         return modelMapper.map(updatedPost,PostDto.class);
 
     }
@@ -79,8 +82,10 @@ public class PostService {
     public ResponseEntity<Void> deletePostById(Long postId){
         if(postRepository.existsById(postId)){
             postRepository.deleteById(postId);
+            log.info("Post deleetd with id : "+ postId);
             return ResponseEntity.ok().build();
         }
+        log.error("No Post found with id: "+ postId);
         return ResponseEntity.notFound().build();
     }
 
@@ -93,6 +98,7 @@ public class PostService {
 
         if(!alreadyLiked){
             post.getLikes().add(PostLikeEntity.builder().post(post).user(user).build());
+            log.info("Post Like sucessful");
             postRepository.save(post);
         }
     }
@@ -103,6 +109,8 @@ public class PostService {
 
         post.getComments().add(Comment.builder().post(post).user(user).content(content).build());
         postRepository.save(post);
+        log.info("Post Comment sucessful");
+
 
     }
 
@@ -116,6 +124,7 @@ public class PostService {
         if(!alreadyReported) {
             post.getReports().add(Report.builder().post(post).user(user).reason(reason).build());
             postRepository.save(post);
+            log.info("Post Report sucessful");
         }
     }
 
@@ -133,6 +142,8 @@ public class PostService {
                 .build();
 
         postRepository.save(shared);
+        log.info("Post Share sucessful");
+
     }
 }
 

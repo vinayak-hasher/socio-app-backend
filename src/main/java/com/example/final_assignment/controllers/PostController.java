@@ -8,6 +8,7 @@ import com.example.final_assignment.entities.PostEntity;
 import com.example.final_assignment.entities.User;
 import com.example.final_assignment.services.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
+@Slf4j
 public class PostController {
     private final PostService postService;
     private ModelMapper modelMapper;
@@ -27,6 +29,7 @@ public class PostController {
     @PostMapping("/create-post")
     @PreAuthorize("isAuthenticated()")
     public PostDto createPost(@RequestBody CreatePostDto createPostDto, @AuthenticationPrincipal User user){
+        log.info("Creating Post");
         return postService.createPost(createPostDto, user);
     }
 
@@ -37,7 +40,9 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId){ return postService.deletePostById(postId);}
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId){
+        log.info("Deleting Post with id "+ postId);
+        return postService.deletePostById(postId);}
 
     @GetMapping
     public List<PostDto> getAllPosts(@RequestParam(required = false) String search){
@@ -47,6 +52,7 @@ public class PostController {
     @PutMapping("/{postId}")
     public ResponseEntity<PostDto> updateUser(@PathVariable Long postId, @RequestBody UpdatePostDto updatePostDto){
         PostDto postDto= postService.updatePost(postId,updatePostDto);
+        log.info("Updating Post sucess");
         return ResponseEntity.ok(postDto);
     }
 

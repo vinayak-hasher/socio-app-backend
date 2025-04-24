@@ -7,10 +7,12 @@ import com.example.final_assignment.entities.UserGroup;
 import com.example.final_assignment.repositories.GroupRepository;
 import com.example.final_assignment.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupPostService {
 
     private final PostRepository postRepository;
@@ -21,6 +23,7 @@ public class GroupPostService {
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
         if (!group.getMembers().contains(user)) {
+            log.error("Group post creation failed");
             throw new RuntimeException("Only group members can post.");
         }
 
@@ -31,6 +34,7 @@ public class GroupPostService {
                 .createdBy(user)
                 .build();
 
+        log.info("Group Post Creation Sucess");
         return toDto(postRepository.save(post));
     }
 
@@ -39,15 +43,18 @@ public class GroupPostService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         if (!post.getGroup().getId().equals(groupId)) {
+            log.error("Error updating as post not belongs to group");
             throw new RuntimeException("Post does not belong to this group.");
         }
 
         if (!post.getCreatedBy().equals(user)) {
+            log.error("Error updating the post as you are not the creator");
             throw new RuntimeException("Only the creator can update this post.");
         }
 
         post.setTitle(dto.getTitle());
         post.setDescription(dto.getDescription());
+        log.info("Group Post Update Sucessful");
         return toDto(postRepository.save(post));
     }
 

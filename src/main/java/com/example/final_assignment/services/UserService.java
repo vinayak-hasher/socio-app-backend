@@ -8,6 +8,7 @@ import com.example.final_assignment.entities.enums.Role;
 import com.example.final_assignment.repositories.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.engine.spi.Resolution;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService {
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
@@ -75,6 +77,7 @@ public class UserService implements UserDetailsService {
         exisitingUser.setEmail(userDto.getEmail());
         exisitingUser.setVisibility(userDto.getVisibility());
         User updatedUser=userRepo.save(exisitingUser);
+        log.info("User updated in the database");
         return modelMapper.map(updatedUser,UserDto.class);
 
     }
@@ -82,8 +85,10 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<Void> deleteById(Long userId){
         if(userRepo.existsById(userId)){
             userRepo.deleteById(userId);
+            log.info("user Deleted with id :"+userId);
             return ResponseEntity.ok().build();
         }
+        log.error("No User found with the id: "+userId);
         return ResponseEntity.notFound().build();
     }
 
@@ -92,12 +97,14 @@ public class UserService implements UserDetailsService {
     public UserDto signUp(SignUpDto signUpDto){
         Optional<User> user= userRepo.findByEmail(signUpDto.getEmail());
         if(user.isPresent()){
+            log.error("User already exists with the mail:"+signUpDto.getEmail());
             throw new BadCredentialsException("User with email already exists"+signUpDto.getEmail());
         }
 
         User toBeCreatedUser= modelMapper.map(signUpDto, User.class);
         toBeCreatedUser.setPassword(passwordEncoder.encode(toBeCreatedUser.getPassword()));
         User saveduser=userRepo.save(toBeCreatedUser);
+        log.info("user created success at service level and saved to DB");
         return modelMapper.map(saveduser,UserDto.class);
     }
 
@@ -117,6 +124,8 @@ public class UserService implements UserDetailsService {
 
         userRepo.save(targetUser);
         userRepo.save(currentUser);
+
+        log.info("Follow success");
     }
 
     @Transactional
@@ -132,6 +141,8 @@ public class UserService implements UserDetailsService {
 
         userRepo.save(targetUser);
         userRepo.save(currentUser);
+
+        log.info("Unfollow success");
     }
 
 
