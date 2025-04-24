@@ -1,5 +1,6 @@
 package com.example.final_assignment.services;
 
+import com.example.final_assignment.dto.CreateGroupDto;
 import com.example.final_assignment.dto.GroupDto;
 import com.example.final_assignment.entities.UserGroup;
 import com.example.final_assignment.entities.User;
@@ -21,12 +22,15 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepo userRepository;
 
-    public GroupDto createGroup(GroupDto dto, User creator) {
+    public GroupDto createGroup(CreateGroupDto dto, User creator) {
+        log.info("Entering service layer:"+creator.getName());
         UserGroup userGroup = UserGroup.builder()
                 .name(dto.getName())
                 .createdBy(creator)
+                .members(new HashSet<>(List.of(creator)))
                 .build();
-        userGroup.getMembers().add(creator);
+//        userGroup.getMembers().add(creator);
+        log.info("Group Created at Service level");
         return toDto(groupRepository.save(userGroup));
     }
 

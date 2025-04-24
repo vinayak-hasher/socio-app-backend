@@ -1,5 +1,6 @@
 package com.example.final_assignment.controllers;
 
+import com.example.final_assignment.dto.CreateGroupDto;
 import com.example.final_assignment.dto.GroupDto;
 import com.example.final_assignment.entities.User;
 import com.example.final_assignment.services.GroupService;
@@ -19,8 +20,8 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    @PostMapping
-    public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto dto,
+    @PostMapping("/create-group")
+    public ResponseEntity<GroupDto> createGroup(@RequestBody CreateGroupDto dto,
                                                 @AuthenticationPrincipal User user) {
         log.info("Creating Group");
         return ResponseEntity.ok(groupService.createGroup(dto, user));
